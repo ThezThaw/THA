@@ -44,7 +44,7 @@ namespace AutoDrivingCarSimulation.UnitTest
         private async Task<bool> Test(string input)
         {
             promptService
-                .Setup(s => s.AskInput("Please enter the width and height of the simulation field in x y format:"))
+                .Setup(s => s.AskInput(AppConst.PromptText.AskSimulationFieldInput, false, true))
                 .Returns(Task.FromResult(input));
 
             fieldDataContext

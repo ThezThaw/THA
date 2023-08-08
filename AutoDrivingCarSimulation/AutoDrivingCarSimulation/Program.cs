@@ -18,10 +18,12 @@ Host.CreateDefaultBuilder().ConfigureServices(services =>
 
     #region FormatChecker
     services.AddScoped(s => new SimulationFieldInputChecker(@"^\d+\s\d+$"));
+    services.AddScoped(s => new ProcessOptionChecker(@"^[12]$"));
     #endregion
 
     #region Services
     services.AddScoped<IPromptService, PromptService>();
+    services.AddScoped<IAskOutput<ProcessOptionData>, AskProcessOptionService>();
     services.AddScoped<ISimulationFieldService, SimulationFieldService>();
     #endregion    
 

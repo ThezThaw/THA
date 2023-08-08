@@ -3,18 +3,16 @@ using AutoDrivingCarSimulation.FormatChecker;
 
 namespace AutoDrivingCarSimulation.Services
 {
-    public class SimulationFieldService : ISimulationFieldService
+    public class SimulationFieldService : ServiceBase, ISimulationFieldService
     {
-        private readonly IPromptService promptService;
         private readonly SimulationFieldInputChecker simulationFieldInputChecker;
         private readonly IDataContext<SimulationFieldData> dataContext;
         public SimulationFieldService(
             IDataContext<SimulationFieldData> dataContext,
             IPromptService promptService,
-            SimulationFieldInputChecker simulationFieldInputChecker)
+            SimulationFieldInputChecker simulationFieldInputChecker): base(promptService)
         {
             this.dataContext = dataContext;
-            this.promptService = promptService;
             this.simulationFieldInputChecker = simulationFieldInputChecker;
         }
 
@@ -28,19 +26,19 @@ namespace AutoDrivingCarSimulation.Services
             {
                 if (!validFormat)
                 {
-                    Console.WriteLine("Invalid input!");
+                    await promptService.ShowWarning(AppConst.PromptText.InvalidSimulationFieldFormat, true, true);
                 }
                 else if (!validSimulationField)
                 {
-                    Console.WriteLine("Simulation field too small!");
+                    await promptService.ShowWarning(AppConst.PromptText.InvalidSimulationFieldSize, true, true);
                 }
 
-                input = await promptService.AskInput("Please enter the width and height of the simulation field in x y format:");
+                input = await promptService.AskInput(AppConst.PromptText.AskSimulationFieldInput, false, true);
                 validFormat = await simulationFieldInputChecker.IsMatch(input);
 
                 if (validFormat)
                 {
-                    var xy = input.Split(" ");
+                    var xy = input.Split(AppConst.InputDelimiter);
                     field = new SimulationFieldData()
                     {
                         width = Convert.ToInt32(xy[0]),
@@ -50,10 +48,9 @@ namespace AutoDrivingCarSimulation.Services
                     validSimulationField = field.width > 0 && field.height > 0;
                 }
             } while (!validFormat || !validSimulationField);
-
             
             dataContext.SetData(field);
-            Console.WriteLine("You have created a field of {0} x {1}.", field.width, field.height);
+            await promptService.ShowMessage(AppConst.PromptText.SimulationFieldInfo, true, true, field.width, field.height);
         }
     }
 
