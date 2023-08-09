@@ -2,21 +2,18 @@
 using AutoDrivingCarSimulation.FormatChecker;
 using AutoDrivingCarSimulation.Services;
 using Moq;
-using System.Text.RegularExpressions;
 
 namespace AutoDrivingCarSimulation.UnitTest
 {
-    public class SimulationFieldInputTest
+    public class SimulationFieldInputTest : UnitTestBase
     {
         private const string pattern = @"^\d+\s\d+$";
-        private readonly Mock<IPromptService> promptService = new Mock<IPromptService>();
         private readonly Mock<SimulationFieldInputChecker> inputChecker = new Mock<SimulationFieldInputChecker>(pattern);
-        protected readonly Mock<IDataContext<SimulationFieldData>> fieldDataContext = new Mock<IDataContext<SimulationFieldData>>();
         private readonly ISimulationFieldService service;
         public SimulationFieldInputTest()
         {
             service = new SimulationFieldService(                
-                fieldDataContext.Object,
+                simulationFieldDataContext.Object,
                 promptService.Object,
                 inputChecker.Object);
         }
@@ -47,7 +44,7 @@ namespace AutoDrivingCarSimulation.UnitTest
                 .Setup(s => s.AskInput(AppConst.PromptText.AskSimulationFieldInput, false, true))
                 .Returns(Task.FromResult(input));
 
-            fieldDataContext
+            simulationFieldDataContext
                     .Setup(s => s.GetData())
                     .Returns(new SimulationFieldData()
                     {

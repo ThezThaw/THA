@@ -1,19 +1,12 @@
-﻿using AutoDrivingCarSimulation.Data;
-using AutoDrivingCarSimulation.FormatChecker;
+﻿using AutoDrivingCarSimulation.FormatChecker;
 using AutoDrivingCarSimulation.Services;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace AutoDrivingCarSimulation.UnitTest.FormatCheckerTest
+namespace AutoDrivingCarSimulation.UnitTest
 {
-    public class ProcessOptionInputTest
+    public class ProcessOptionInputTest : UnitTestBase
     {
         private const string pattern = @"^[12]$";
-        private readonly Mock<IPromptService> promptService = new Mock<IPromptService>();
         private readonly Mock<ProcessOptionChecker> inputChecker = new Mock<ProcessOptionChecker>(pattern);        
         private readonly AskProcessOptionService service;
         public ProcessOptionInputTest()

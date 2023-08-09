@@ -14,17 +14,23 @@ Host.CreateDefaultBuilder().ConfigureServices(services =>
 
     #region DataContext
     services.AddScoped<IDataContext<SimulationFieldData>, DataContext<SimulationFieldData>>();
+    services.AddScoped<IDataContext<List<CarData>>, DataContext<List<CarData>>>();
     #endregion
 
     #region FormatChecker
     services.AddScoped(s => new SimulationFieldInputChecker(@"^\d+\s\d+$"));
     services.AddScoped(s => new ProcessOptionChecker(@"^[12]$"));
+    services.AddScoped(s => new PositionInputFormatChecker(@"^\d+\s\d+\s[NSWE]$"));
+    services.AddScoped(s => new CommandInputChecker(@"^[LRF]+$"));
     #endregion
 
     #region Services
-    services.AddScoped<IPromptService, PromptService>();
-    services.AddScoped<IAskOutput<ProcessOptionData>, AskProcessOptionService>();
+    services.AddScoped<IPromptService, PromptService>();    
     services.AddScoped<ISimulationFieldService, SimulationFieldService>();
+    services.AddScoped<IAskOutput<ProcessOptionData>, AskProcessOptionService>();
+    services.AddScoped<ICarService, CarService>();
+    services.AddScoped<IAskPositionService, AskPositionService>();
+    services.AddScoped<IAskCommandService, AskCommandService>();
     #endregion    
 
     services.AddScoped<IProcess, Process>();
