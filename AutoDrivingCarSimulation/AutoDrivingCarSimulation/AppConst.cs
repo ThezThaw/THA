@@ -20,8 +20,10 @@
             public const string InvalidCommand = "Invalid input! Only allow L,R and F\r\n - L : rotates the car by 90 degrees to the left\r\n - R : rotates the car by 90 degrees to the right\r\n - F : moves forward by 1 grid point\r\nE.g. FFRFFFFRRL";
 
             public const string SimulationFieldInfo = "You have created a field of {0} x {1}.";
-            public const string DuplicateCarName = "`{0}` already exists in car list.";
+            public const string DuplicateCarName = "`{0}` already exists in car list.";            
             public const string ListOfCarText = "Your current list of cars are:";
+            public const string NoCarInTheList = "There is no car to start simulation.";
+            public const string AfterSimulationResultText = "After simulation, the result is:";
         }
     }
 
@@ -34,10 +36,16 @@
         }
         public enum Direction
         {
-            N,
-            E,
-            S,
-            W
+            N = 0,
+            E = 90,
+            S = 180,
+            W = 270
+        }
+        public enum DriveCommand
+        {
+            L = -90, //counter-clockwise
+            R = 90, //clockwise
+            F = 1 //move one grid point
         }
     }
 

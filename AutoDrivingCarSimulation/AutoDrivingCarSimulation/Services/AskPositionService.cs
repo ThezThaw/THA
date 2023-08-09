@@ -35,7 +35,7 @@ namespace AutoDrivingCarSimulation.Services
 
                 if (validFormat)
                 {
-                    var position = input.Split(AppConst.InputDelimiter);
+                    var position = input.Trim().Split(AppConst.InputDelimiter);
                     p.x = Convert.ToInt32(position[0]);
                     p.y = Convert.ToInt32(position[1]);
                     Enum.TryParse(position[2], out AppEnum.Direction direction);

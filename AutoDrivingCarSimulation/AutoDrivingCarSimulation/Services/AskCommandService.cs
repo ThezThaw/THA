@@ -24,7 +24,7 @@ namespace AutoDrivingCarSimulation.Services
                 validFormat = await commandInputFormatChecker.IsMatch(input.Trim());
 
             } while (!validFormat);
-            askForThisCar.command = new CommandData() { command = input };
+            askForThisCar.command = new CommandData() { command = input.Trim() };
         }
     }
 

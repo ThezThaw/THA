@@ -23,12 +23,12 @@ namespace AutoDrivingCarSimulation.Services
                     await promptService.ShowWarning(AppConst.PromptText.InvalidOption, true, true);
                 }
                 inputOption = await promptService.AskInput(AppConst.PromptText.AskProcessOption, false, true);
-                validFormat = await processOptionFormatChecker.IsMatch(inputOption);
+                validFormat = await processOptionFormatChecker.IsMatch(inputOption.Trim());
 
             } while (!validFormat);
 
             await promptService.Clear();
-            Enum.TryParse(inputOption, out ProcessOption option);
+            Enum.TryParse(inputOption.Trim(), out ProcessOption option);
             return new ProcessOptionData()
             {
                 option = option

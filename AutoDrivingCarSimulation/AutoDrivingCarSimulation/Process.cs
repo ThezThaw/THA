@@ -12,6 +12,7 @@ namespace AutoDrivingCarSimulation
         private readonly ICarService carService;
         private readonly IAskPositionService askPositionService;
         private readonly IAskCommandService askCommandService;
+        private readonly ISimulationService simulationService;
 
         private readonly IDataContext<List<CarData>> carDataContext;
         public Process(ISimulationFieldService simulationFieldService,
@@ -20,7 +21,8 @@ namespace AutoDrivingCarSimulation
             ICarService carService,
             IAskPositionService askPositionService,
             IAskCommandService askCommandService,
-            IDataContext<List<CarData>> carDataContext)
+            IDataContext<List<CarData>> carDataContext,
+            ISimulationService simulationService)
         {
             this.simulationFieldService = simulationFieldService;
             this.askProcessOptionService = askProcessOptionService;
@@ -29,6 +31,7 @@ namespace AutoDrivingCarSimulation
             this.askPositionService = askPositionService;
             this.askCommandService = askCommandService;
             this.carDataContext = carDataContext;
+            this.simulationService = simulationService;
         }
         public async Task Start()
         {
@@ -58,8 +61,19 @@ namespace AutoDrivingCarSimulation
             }
             else if (processOption.option == AppEnum.ProcessOption.RunSimulation)
             {
-                Console.WriteLine($"You choose Run Simulation option");
+                if (carDataContext.GetData() is null || !carDataContext.GetData().Any())
+                {
+                    await promptService.ShowMessage(AppConst.PromptText.NoCarInTheList, true, true);
+                    await AskProcessOption();
+                }
+                await RunSimulation();
             }
+        }
+        private async Task RunSimulation()
+        {
+            await simulationService.Run();
+            await ShowListOfCar();
+            await ShowResult();
         }
         private async Task ShowListOfCar()
         {
@@ -68,6 +82,30 @@ namespace AutoDrivingCarSimulation
             carDataContext.GetData().ForEach(async car =>
             {
                 sb.AppendLine($"- {car.name}, ({car.initialPosition.x},{car.initialPosition.y}) {car.initialPosition.direction}, {car.command.command}");
+            });
+            await promptService.ShowMessage(sb.ToString(), false, true);
+        }
+        private async Task ShowResult()
+        {
+            await promptService.ShowMessage(AppConst.PromptText.AfterSimulationResultText, false, false);
+            var sb = new StringBuilder();
+            var cars = carDataContext.GetData();
+            var collideCars = carDataContext.GetData().Where(c => c.collide).ToList();
+            cars.OrderBy(c => c.name).ToList().ForEach(car =>
+            {
+                //After stopped, another moving car might be come and hit.
+                var hitBy = car.hitAfterStopped.Any() ? string.Join(",", car.hitAfterStopped.Select(c => c.name)) : String.Empty;
+
+                sb.Append($"- {car.name}, ");
+                if (car.collide)
+                {
+                    var collideWith = string.Join(",", car.collideWith.Select(c => c.name));                    
+                    sb.AppendLine($"collides with {collideWith} at ({car.currentPosition.x},{car.currentPosition.y}) at step {car.collideStep}");
+                }
+                else
+                {
+                    sb.AppendLine($"({car.currentPosition.x},{car.currentPosition.y}) {car.currentPosition.direction}");
+                }
             });
             await promptService.ShowMessage(sb.ToString(), false, true);
         }

@@ -31,6 +31,10 @@ Host.CreateDefaultBuilder().ConfigureServices(services =>
     services.AddScoped<ICarService, CarService>();
     services.AddScoped<IAskPositionService, AskPositionService>();
     services.AddScoped<IAskCommandService, AskCommandService>();
+    services.AddScoped<IDriveHolder<Rotate>, Rotate>();
+    services.AddScoped<IDriveHolder<Move>, Move>();
+    services.AddScoped<ISimulationService, SimulationService>();
+    services.AddScoped<ISimulationFactory, SimulationFactory>();
     #endregion    
 
     services.AddScoped<IProcess, Process>();
