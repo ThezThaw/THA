@@ -1,11 +1,14 @@
 ﻿using AutoDrivingCarSimulation.Data;
 using AutoDrivingCarSimulation.Services;
+using Microsoft.Extensions.Hosting;
 using System.Text;
 
 namespace AutoDrivingCarSimulation
 {
     public class Process : IProcess
     {
+        private readonly IHostApplicationLifetime hostApplicationLifetime;
+
         private readonly IPromptService promptService;
         private readonly ISimulationFieldService simulationFieldService;
         private readonly IAskOutput<ProcessOptionData> askProcessOptionService;
@@ -13,6 +16,7 @@ namespace AutoDrivingCarSimulation
         private readonly IAskPositionService askPositionService;
         private readonly IAskCommandService askCommandService;
         private readonly ISimulationService simulationService;
+        private readonly IAskOutput<ExitOptionData> askExitOptionService;
 
         private readonly IDataContext<List<CarData>> carDataContext;
         public Process(ISimulationFieldService simulationFieldService,
@@ -22,7 +26,9 @@ namespace AutoDrivingCarSimulation
             IAskPositionService askPositionService,
             IAskCommandService askCommandService,
             IDataContext<List<CarData>> carDataContext,
-            ISimulationService simulationService)
+            ISimulationService simulationService,
+            IAskOutput<ExitOptionData> askExitOptionService,
+            IHostApplicationLifetime hostApplicationLifetime)
         {
             this.simulationFieldService = simulationFieldService;
             this.askProcessOptionService = askProcessOptionService;
@@ -32,6 +38,8 @@ namespace AutoDrivingCarSimulation
             this.askCommandService = askCommandService;
             this.carDataContext = carDataContext;
             this.simulationService = simulationService;
+            this.askExitOptionService = askExitOptionService;
+            this.hostApplicationLifetime = hostApplicationLifetime;
         }
         public async Task Start()
         {
@@ -43,6 +51,17 @@ namespace AutoDrivingCarSimulation
 
             //Ask exit option
             //Start over OR exit
+            var exitOption = await askExitOptionService.Ask();
+            if (exitOption.option == AppEnum.ExitOption.StartOver)
+            {
+                await carDataContext.Reset();
+                await Start();
+            }
+            else if (exitOption.option == AppEnum.ExitOption.Exit)
+            {
+                await promptService.ShowMessage(AppConst.PromptText.GoodbyeText, true, true);
+                await Stop();
+            }
         }
         private async Task AskProcessOption()
         {
@@ -61,9 +80,10 @@ namespace AutoDrivingCarSimulation
             }
             else if (processOption.option == AppEnum.ProcessOption.RunSimulation)
             {
-                if (carDataContext.GetData() is null || !carDataContext.GetData().Any())
+                var cars = await carDataContext.GetData();
+                if (cars is null || !cars.Any())
                 {
-                    await promptService.ShowMessage(AppConst.PromptText.NoCarInTheList, true, true);
+                    await promptService.ShowWarning(AppConst.PromptText.NoCarInTheList, true, true);
                     await AskProcessOption();
                 }
                 await RunSimulation();
@@ -77,9 +97,10 @@ namespace AutoDrivingCarSimulation
         }
         private async Task ShowListOfCar()
         {
+            var cars = await carDataContext.GetData();
             await promptService.ShowMessage(AppConst.PromptText.ListOfCarText, true, false);
             var sb = new StringBuilder();
-            carDataContext.GetData().ForEach(async car =>
+            cars.ForEach(async car =>
             {
                 sb.AppendLine($"- {car.name}, ({car.initialPosition.x},{car.initialPosition.y}) {car.initialPosition.direction}, {car.command.command}");
             });
@@ -89,8 +110,8 @@ namespace AutoDrivingCarSimulation
         {
             await promptService.ShowMessage(AppConst.PromptText.AfterSimulationResultText, false, false);
             var sb = new StringBuilder();
-            var cars = carDataContext.GetData();
-            var collideCars = carDataContext.GetData().Where(c => c.collide).ToList();
+            var cars = await carDataContext.GetData();
+            var collideCars = cars.Where(c => c.collide).ToList();
             cars.OrderBy(c => c.name).ToList().ForEach(car =>
             {
                 //After stopped, another moving car might be come and hit.
@@ -109,9 +130,13 @@ namespace AutoDrivingCarSimulation
             });
             await promptService.ShowMessage(sb.ToString(), false, true);
         }
-        public Task Stop()
+        public async Task Stop()
         {
-            throw new NotImplementedException();
+            await Task.Run(() =>
+            {
+                Console.ReadKey();
+                this.hostApplicationLifetime.StopApplication();
+            });
         }
     }
 

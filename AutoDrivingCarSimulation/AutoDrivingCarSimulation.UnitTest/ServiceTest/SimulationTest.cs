@@ -55,11 +55,11 @@ namespace AutoDrivingCarSimulation.UnitTest
 
             simulationFieldDataContext
                 .Setup(s => s.GetData())
-                .Returns(new SimulationFieldData() { width = 10, height = 10 });
+                .Returns(Task.FromResult(new SimulationFieldData() { width = 10, height = 10 }));
 
             carDataContext
                 .Setup(s => s.GetData())
-                .Returns(cars);
+                .Returns(Task.FromResult(cars));
 
             SimulationFactorySetup();
             await simulationService.Run();
@@ -100,11 +100,11 @@ namespace AutoDrivingCarSimulation.UnitTest
 
             simulationFieldDataContext
                 .Setup(s => s.GetData())
-                .Returns(new SimulationFieldData() { width = 10, height = 10 });
+                .Returns(Task.FromResult(new SimulationFieldData() { width = 10, height = 10 }));
 
             carDataContext
                 .Setup(s => s.GetData())
-                .Returns(cars);
+                .Returns(Task.FromResult(cars));
 
             SimulationFactorySetup();
             await simulationService.Run();
@@ -164,11 +164,11 @@ namespace AutoDrivingCarSimulation.UnitTest
 
             simulationFieldDataContext
                 .Setup(s => s.GetData())
-                .Returns(new SimulationFieldData() { width = 10, height = 10 });
+                .Returns(Task.FromResult(new SimulationFieldData() { width = 10, height = 10 }));
 
             carDataContext
                 .Setup(s => s.GetData())
-                .Returns(cars);
+                .Returns(Task.FromResult(cars));
 
             SimulationFactorySetup();
             await simulationService.Run();

@@ -6,11 +6,14 @@
         public static class PromptText
         {
             public const string WelcomeText = "Welcome to Auto Driving Car Simulation!";
+            public const string GoodbyeText = "Thank you for running the simulation. Goodbye!";
+
             public const string AskSimulationFieldInput = "Please enter the width and height of the simulation field in x y format:";
             public const string AskProcessOption = "Please choose from the following options:\r\n[1] Add a car to field\r\n[2] Run simulation";
             public const string AskCarName = "Please enter the name of the car:";
             public const string AskInitialPosition = "Please enter initial position of car `{0}` in x y Direction format:";
             public const string AskCommand = "Please enter the command for car `{0}`:";
+            public const string AskExitOption = "Please choose from the following options:\r\n[1] Start Over\r\n[2] Exit";
 
             public const string InvalidOption = "Invalid option!";
             public const string InvalidSimulationFieldFormat = "Invalid input! E.g. x y format: 10 10";
@@ -46,6 +49,11 @@
             L = -90, //counter-clockwise
             R = 90, //clockwise
             F = 1 //move one grid point
+        }
+        public enum ExitOption
+        {
+            StartOver = 1,
+            Exit = 2
         }
     }
 

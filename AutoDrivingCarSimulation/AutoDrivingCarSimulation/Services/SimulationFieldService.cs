@@ -49,7 +49,7 @@ namespace AutoDrivingCarSimulation.Services
                 }
             } while (!validFormat || !validSimulationField);
             
-            dataContext.SetData(field);
+            await dataContext.SetData(field);
             await promptService.ShowMessage(AppConst.PromptText.SimulationFieldInfo, true, true, field.width, field.height);
         }
     }

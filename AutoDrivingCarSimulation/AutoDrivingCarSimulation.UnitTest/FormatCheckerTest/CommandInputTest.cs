@@ -83,11 +83,11 @@ namespace AutoDrivingCarSimulation.UnitTest
 
             simulationFieldDataContext
                 .Setup(s => s.GetData())
-                .Returns(new SimulationFieldData()
+                .Returns(Task.FromResult(new SimulationFieldData()
                 {
                     width = 10,
                     height = 10
-                });
+                }));
 
             var taskCompleted = Task.Run(() => service.Ask(askForThisCar)).Wait(TimeSpan.FromSeconds(5));
             return await Task.FromResult(taskCompleted);

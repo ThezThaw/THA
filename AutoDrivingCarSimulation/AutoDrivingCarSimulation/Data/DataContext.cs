@@ -4,15 +4,24 @@
     {
         public T data { get; set; }
         public DataContext() { }
-        public void SetData(T data)
+        public async Task SetData(T data)
         {
-            this.data = data;
+            await Task.Run(() => this.data = data);
         }
-        public T GetData() => this.data;
+        public async Task<T> GetData()
+        {
+            return await Task.FromResult(this.data);
+        }
+
+        public async Task Reset()
+        {
+            await this.SetData(null);
+        }
     }
     public interface IDataContext<T> where T : class
     {
-        void SetData(T data);
-        T GetData();
+        Task SetData(T data);
+        Task Reset();
+        Task<T> GetData();
     }
 }

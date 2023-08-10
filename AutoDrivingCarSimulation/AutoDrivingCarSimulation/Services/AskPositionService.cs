@@ -18,7 +18,7 @@ namespace AutoDrivingCarSimulation.Services
             var validPosition = true;
             var input = string.Empty;
             var p = new PositionData();
-
+            var simulationFieldInfo = await fieldDataContext.GetData();
             do
             {
                 if (!validFormat)
@@ -27,7 +27,7 @@ namespace AutoDrivingCarSimulation.Services
                 }
                 else if (!validPosition)
                 {
-                    await promptService.ShowMessage(AppConst.PromptText.InvalidPositionOutOfField, true, true, fieldDataContext.GetData().width, fieldDataContext.GetData().height);
+                    await promptService.ShowMessage(AppConst.PromptText.InvalidPositionOutOfField, true, true, simulationFieldInfo.width, simulationFieldInfo.height);
                 }
 
                 input = await promptService.AskInput(AppConst.PromptText.AskInitialPosition, false, true, askForThisCar.name);
@@ -41,7 +41,7 @@ namespace AutoDrivingCarSimulation.Services
                     Enum.TryParse(position[2], out AppEnum.Direction direction);
                     p.direction = direction;
 
-                    validPosition = p.x <= fieldDataContext.GetData().width && p.y <= fieldDataContext.GetData().height;
+                    validPosition = p.x <= simulationFieldInfo.width && p.y <= simulationFieldInfo.height;
                 }
 
             } while (!validFormat || !validPosition);

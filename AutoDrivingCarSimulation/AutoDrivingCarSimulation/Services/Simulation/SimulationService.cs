@@ -19,11 +19,12 @@ namespace AutoDrivingCarSimulation.Services
         }
 
         public async Task Run()
-        {            
-            var maxCommandLen = carDataContext.GetData().Max(x => x.command.command.Length);
+        {
+            var cars = await carDataContext.GetData();
+            var maxCommandLen = cars.Max(x => x.command.command.Length);
             for (int idx = 0; idx < maxCommandLen; idx++)
             {
-                foreach (var car in carDataContext.GetData())
+                foreach (var car in cars)
                 {
                     //skip drive if 'out of field' or collide with other car or no more command
                     var command = car.command.command.ToCharArray();
@@ -54,7 +55,7 @@ namespace AutoDrivingCarSimulation.Services
 
         private async Task<bool> IsOutOfField(PositionData position)
         {
-            var fieldXY = simulationFieldDataContext.GetData();
+            var fieldXY = await simulationFieldDataContext.GetData();
             var outOfField = position.x < 0 
                              ||
                              position.y < 0 
@@ -66,41 +67,38 @@ namespace AutoDrivingCarSimulation.Services
         }
         private async Task FindCollideCars(int currentStepZeroBase)
         {
-            await Task.Run(() =>
-            {
-                var samePositionCarGroup = carDataContext.GetData()
-                                            .GroupBy(car => new
+            var cars = await carDataContext.GetData();
+            var samePositionCarGroup = cars.GroupBy(car => new
                                             {
                                                 car.currentPosition.x,
                                                 car.currentPosition.y
                                             })
                                             .ToList();
 
-                foreach (var samePositionCars in samePositionCarGroup)
+            foreach (var samePositionCars in samePositionCarGroup)
+            {
+                //more than one car at same position means collide
+                if (samePositionCars.Count() > 1)
                 {
-                    //more than one car at same position means collide
-                    if (samePositionCars.Count() > 1)
+                    var stoppedCars = samePositionCars.Where(c => c.stopped);
+                    var drivingCars = samePositionCars.Where(c => !c.stopped);
+
+                    stoppedCars.ToList().ForEach(car =>
                     {
-                        var stoppedCars = samePositionCars.Where(c => c.stopped);
-                        var drivingCars = samePositionCars.Where(c => !c.stopped);
+                        var cars = drivingCars.Select(c => new CarReferenceData() { name = c.name });
+                        car.hitAfterStopped.AddRange(cars);
+                    });
 
-                        stoppedCars.ToList().ForEach(car => 
-                        {
-                            var cars = drivingCars.Select(c => new CarReferenceData() { name = c.name });                            
-                            car.hitAfterStopped.AddRange(cars);
-                        });
-
-                        drivingCars.ToList().ForEach(car =>
-                        {
-                            var otherDrivingOrStoppedCars = samePositionCars.Where(c => c.name != car.name).Select(c => new CarReferenceData() { name = c.name });
-                            car.collideWith.AddRange(otherDrivingOrStoppedCars);
-                            car.collide = true;
-                            car.stopped = true;
-                            car.collideStep = (currentStepZeroBase + 1);
-                        });
-                    }
+                    drivingCars.ToList().ForEach(car =>
+                    {
+                        var otherDrivingOrStoppedCars = samePositionCars.Where(c => c.name != car.name).Select(c => new CarReferenceData() { name = c.name });
+                        car.collideWith.AddRange(otherDrivingOrStoppedCars);
+                        car.collide = true;
+                        car.stopped = true;
+                        car.collideStep = (currentStepZeroBase + 1);
+                    });
                 }
-            });
+            }
         }
     }
 

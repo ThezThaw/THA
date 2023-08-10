@@ -13,6 +13,8 @@ namespace AutoDrivingCarSimulation.Services
 
         public async Task<CarData> Add()
         {
+            var cars = await dataContext.GetData();
+
             var duplicateName = false;
             var carNameEmpty = false;//to check user input
             var carName = string.Empty;
@@ -29,9 +31,13 @@ namespace AutoDrivingCarSimulation.Services
                 carName = await promptService.AskInput(AppConst.PromptText.AskCarName, false, true);
                 carName = carName.Trim();
                 carNameEmpty = string.IsNullOrEmpty(carName);
-                if (!carNameEmpty)
+                if (carNameEmpty)
                 {
-                    duplicateName = dataContext.GetData() is null ? false : dataContext.GetData().Any(x => x?.name == carName);
+                    duplicateName = false;
+                }
+                else
+                {
+                    duplicateName = cars is null ? false : cars.Any(x => x?.name == carName);
                 }
 
             } while (duplicateName || carNameEmpty);
@@ -40,11 +46,10 @@ namespace AutoDrivingCarSimulation.Services
             {
                 name = carName
             };
-
-            var cars = dataContext.GetData();
+            
             if (cars is null) cars = new List<CarData>();            
             cars.Add(car);
-            dataContext.SetData(cars);
+            await dataContext.SetData(cars);
             await promptService.Clear();
             return car;
         }

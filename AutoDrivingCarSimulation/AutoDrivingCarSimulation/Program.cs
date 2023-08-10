@@ -22,6 +22,7 @@ Host.CreateDefaultBuilder().ConfigureServices(services =>
     services.AddScoped(s => new ProcessOptionChecker(@"^[12]$"));
     services.AddScoped(s => new PositionInputFormatChecker(@"^\d+\s\d+\s[NSWE]$"));
     services.AddScoped(s => new CommandInputChecker(@"^[LRF]+$"));
+    services.AddScoped(s => new ExitOptionFormatChecker(@"^[12]$"));
     #endregion
 
     #region Services
@@ -35,6 +36,7 @@ Host.CreateDefaultBuilder().ConfigureServices(services =>
     services.AddScoped<IDriveHolder<Move>, Move>();
     services.AddScoped<ISimulationService, SimulationService>();
     services.AddScoped<ISimulationFactory, SimulationFactory>();
+    services.AddScoped<IAskOutput<ExitOptionData>, AskExitOptionService>();
     #endregion    
 
     services.AddScoped<IProcess, Process>();
