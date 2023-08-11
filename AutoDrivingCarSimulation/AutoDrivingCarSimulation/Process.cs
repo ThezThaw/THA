@@ -7,6 +7,7 @@ namespace AutoDrivingCarSimulation
 {
     public class Process : IProcess
     {
+        private bool exceptionHappened = false;
         private readonly IHostApplicationLifetime hostApplicationLifetime;
 
         private readonly IPromptService promptService;
@@ -43,24 +44,36 @@ namespace AutoDrivingCarSimulation
         }
         public async Task Start()
         {
-            await promptService.ShowMessage(AppConst.PromptText.WelcomeText, true, true);
-            //Ask field input
-            //Check input format
-            await simulationFieldService.DefineField();
-            await AskProcessOption();
-
-            //Ask exit option
-            //Start over OR exit
-            var exitOption = await askExitOptionService.Ask();
-            if (exitOption.option == AppEnum.ExitOption.StartOver)
+            try
             {
+                var removeEalierPromptedText = !exceptionHappened;
+                await promptService.ShowMessage(AppConst.PromptText.WelcomeText, removeEalierPromptedText, true);
+                exceptionHappened = false;//reset flag
+                //Ask field input
+                //Check input format
+                await simulationFieldService.DefineField();
+                await AskProcessOption();
+
+                //Ask exit option
+                //Start over OR exit
+                var exitOption = await askExitOptionService.Ask();
+                if (exitOption.option == AppEnum.ExitOption.StartOver)
+                {
+                    await carDataContext.Reset();
+                    await Start();
+                }
+                else if (exitOption.option == AppEnum.ExitOption.Exit)
+                {
+                    await promptService.ShowMessage(AppConst.PromptText.GoodbyeText, true, true);
+                    await Stop();
+                }
+            }
+            catch (Exception)
+            {
+                await promptService.ShowWarning(AppConst.PromptText.Exception, true, true);
+                exceptionHappened = true;
                 await carDataContext.Reset();
                 await Start();
-            }
-            else if (exitOption.option == AppEnum.ExitOption.Exit)
-            {
-                await promptService.ShowMessage(AppConst.PromptText.GoodbyeText, true, true);
-                await Stop();
             }
         }
         private async Task AskProcessOption()

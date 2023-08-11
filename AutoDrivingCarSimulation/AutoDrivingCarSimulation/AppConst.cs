@@ -27,6 +27,8 @@
             public const string ListOfCarText = "Your current list of cars are:";
             public const string NoCarInTheList = "There is no car to start simulation.";
             public const string AfterSimulationResultText = "After simulation, the result is:";
+
+            public const string Exception = "Encounter some exception. Service is restarted.";
         }
     }
 
