@@ -29,7 +29,7 @@ namespace AutoDrivingCarSimulation.UnitTest
         }
 
         [Fact]
-        public async Task ValidScenario()
+        public async Task NoCollision__SingleCar__Scenario()
         {
             var cars = new List<CarData>();
             cars.Add(new CarData()
@@ -68,9 +68,10 @@ namespace AutoDrivingCarSimulation.UnitTest
 
             Assert.Equal(5, carA.currentPosition.x);
             Assert.Equal(4, carA.currentPosition.y);
+            Assert.Equal(Direction.S, (Direction)carA.currentPosition.direction);
             Assert.False(carA.collide);
             Assert.False(carA.outOfSimulationField);
-            Assert.Equal(Direction.S, (Direction)carA.currentPosition.direction);
+            
         }
 
         [Fact]
